@@ -1,2 +1,1 @@
-# Tài liệu đội tuyển tin học QB
-# ~ NTC ~
+# Tài liệu đội tuyển tin học
