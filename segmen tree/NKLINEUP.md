@@ -1,15 +1,16 @@
+
 ## NKLINEUP - Xếp hàng
+
 > Đề bài : https://oj.vnoi.info/problem/nklineup
 > Tóm tắt : Cho một mảng a[1 -> n].
 > Có q truy vấn, mỗi truy vấn có dạng [l,r] yêu cầu tính chênh lệch của phần tử lớn nhất và phần nhỏ nhỏ nhất trong đoạn này (tức là max(a[l...r]) - min(a[l...r])).
 
 Cách giải : Xây dựng segment tree có 2 mảng tmax[], tmin[]:
-    - tmax dùng để lưu giá trị lớn nhất của mỗi nút, tmin dùng để lưu giá trị nhỏ nhất của mỗi nút
-	- Xây dựng segment tree tính tmax,tmin dựa vào mảng a[]
-	- Với mỗi truy vấn [l,r], sử dụng 2 hàm getMax và getMin để tính max/min trong đoạn này và trả về kết quả.
+- tmax dùng để lưu giá trị lớn nhất của mỗi nút, tmin dùng để lưu giá trị nhỏ nhất của mỗi nút
+- Xây dựng segment tree tính tmax,tmin dựa vào mảng a[]
+- Với mỗi truy vấn [l,r], sử dụng 2 hàm getMax và getMin để tính max/min trong đoạn này và trả về kết quả.
 
-Code:
-
+ Code:
 ```
 uses math;
 
