@@ -309,7 +309,7 @@ Ngoài ra còn một số bài toán nâng cao khác như :
 
 ### Cập nhật một đoạn liên tiếp (Lazy Propagation)
 
-Tất cả các bài toán trong các phần đã thảo luận trên chỉ nói về các truy vấn cập nhật một phần tử duy nhất của mảng. Tuy nhiên, Cây Phân đoạn cho phép áp dụng các truy vấn **thay đổi cho toàn bộ một đoạn các phần tử liền kề** và thực hiện truy vấn trong thời gian tương đương O(logn).
+Tất cả các bài toán trong các phần đã thảo luận trên chỉ nói về các truy vấn cập nhật một phần tử duy nhất của mảng. Tuy nhiên, Cây Phân đoạn cho phép áp dụng các truy vấn **thay đổi cho toàn bộ một đoạn các phần tử liền kề** và thực hiện truy vấn kết quả trong thời gian O(logn).
 
 #### Cộng vào một đoạn
 
@@ -320,43 +320,43 @@ Chúng ta bắt đầu bằng cách xem xét bài toán ở dạng đơn giản 
 Nếu bây giờ có một truy vấn hỏi giá trị hiện tại của một phần tử a[i] cụ thế, chỉ cần đi trên cây từ trên xuống dưới và cộng tất cả các giá trị được tìm thấy trên đường đi là đủ.
 
 ```
-void build(int a[], int v, int tl, int tr) {
-    if (tl == tr) {
-        t[v] = a[tl];
-    } else {
-        int tm = (tl + tr) / 2;
-        build(a, v*2, tl, tm);
-        build(a, v*2+1, tm+1, tr);
-        t[v] = 0;
-    }
-}
-
-void update(int v, int tl, int tr, int l, int r, int add) {
-    if (l > r)
-        return;
-    if (l == tl && r == tr) {
-        t[v] += add;
-    } else {
-        int tm = (tl + tr) / 2;
-        update(v*2, tl, tm, l, min(r, tm), add);
-        update(v*2+1, tm+1, tr, max(l, tm+1), r, add);
-    }
-}
-
-int get(int v, int tl, int tr, int pos) {
-    if (tl == tr)
-        return t[v];
-    int tm = (tl + tr) / 2;
-    if (pos <= tm)
-        return t[v] + get(v*2, tl, tm, pos);
-    else
-        return t[v] + get(v*2+1, tm+1, tr, pos);
-}
+procedure build(var a : intArr; v, tl, tr : longint);
+    var tmid : longint;
+    begin
+        if(tl = tr) then t[v] := a[tl];
+        else begin
+            tmid := (tl + tr) div 2;
+            build(a, v * 2, tl, tmid);
+            build(a, v * 2 + 1, tmid + 1, tr);
+            t[v] := 0;
+        end;
+    end;
+    
+procedure update(v, tl, tr, l, r, x : longint); // cộng x vào đoạn [l,r]
+    var tmid : longint;
+    begin
+        if(l > r) or (l > tr) or (tl > r) then exit; // không giao nhau
+        if (l <= tl) and (tr <= r) then t[v] := t[v] + x; // nếu [tl,tr] nằm trong [l,r]
+        else begin
+            tmid := (tl + tr) div 2;
+            update(v * 2, tl, tmid, l, r, x); // 
+            update(v * 2 + 1, tmid + 1, tr, l, r, x); //
+        end;
+    end;
+    
+function get(v, tl, tr, pos : longint): longint; // lấy giá trị của a[pos] ở thời điểm hiện tại
+    var tmid : longint;
+    begin
+        if(tl == tr) then exit(t[v]);
+        tmid := (tl + tr) div 2;
+        if(pos <= tmid) then exit(get(v * 2,tl,tmid,pos) + t[v]); // nếu pos nằm trong nút con bên trái thì gọi đệ quy sang nút bên trái
+        else exit(get(v * 2 + 1,tmid + 1,tr,pos) + t[v]); // tương tự với bên phải
+    end;
 ```
 
 #### Gán một đoạn
 
-Giả sử bây giờ truy vấn cập nhật yêu cầu gán từng phần tử của một đoạn a\[l... r\] nhất định thành số p. Truy vấn thứ hai yêu cầu trả về giá trị của a[i]. 
+Giả sử bây giờ truy vấn cập nhật yêu cầu gán từng phần tử của một đoạn a\[l... r\] thành số p. Truy vấn thứ hai yêu cầu trả về giá trị của a[i]. 
 
 Để thực hiện truy vấn cập nhật này trên toàn bộ đoạn, ta phải lưu trữ ở mỗi nút của Cây Phân đoạn một thông tin: `liệu phân đoạn mà nút này quản lí có được bao phủ bởi một phép gán bằng p nào hay không`. Điều này cho phép chúng ta thực hiện thao tác cập nhật "lazy (lười biếng)": trong mỗi truy vấn gán đoạn [l...r] bằng p, thay vì thay đổi tất cả phần tử trong đoạn, chúng ta chỉ thay đổi một số nút được tách ra từ đoạn [l...r] => thông tin của truy vấn sẽ được lưu vào các nút này.
 
@@ -375,39 +375,46 @@ Tóm lại: đối với bất kỳ truy vấn nào (truy vấn cập nhật ho�
 Để thực hiện, chúng ta cần tạo một hàm push (đẩy), hàm này sẽ nhận tham số là nút hiện tại và nó sẽ đẩy thông tin trong nút này tới cả hai nút con của nó. Chúng ta sẽ gọi hàm này ở phần đầu của các hàm truy vấn (nhưng chúng ta sẽ không gọi nó từ các nút lá, vì nút lá không có nút con nên không cần đẩy nữa).
 
 ```
-void push(int v) {
-    if (marked[v]) {
-        t[v*2] = t[v*2+1] = t[v];
-        marked[v*2] = marked[v*2+1] = true;
-        marked[v] = false;
-    }
-}
+// marked[v] = đánh dấu liệu đang có phép gán nào cho toàn bộ nút v (được lưu tại t[v]) hay không
 
-void update(int v, int tl, int tr, int l, int r, int new_val) {
-    if (l > r) 
-        return;
-    if (l == tl && tr == r) {
-        t[v] = new_val;
-        marked[v] = true;
-    } else {
-        push(v);
-        int tm = (tl + tr) / 2;
-        update(v*2, tl, tm, l, min(r, tm), new_val);
-        update(v*2+1, tm+1, tr, max(l, tm+1), r, new_val);
-    }
-}
+procedure push(v,tl,tr : longint);
+    begin
+        if(marked[v]) then begin
+            if(tl < tr) then begin
+                t[v * 2] := t[v];
+                t[v * 2 + 1] := t[v];
+                marked[v * 2] := true;
+                marked[v * 2 + 1] := true;
+            end;
+            marked[v] := false;
+        end;
+    end;
+    
+procedure update(v, tl, tr, l, r, x : longint); // gán x cho đoạn [l,r]
+    var tmid : longint;
+    begin
+        push(v, tl, tr); // đẩy giá trị được gán cho đoạn [tl,tr] xuống 2 nút con
+        if (l > tr) or (tl > r) then exit; // không giao nhau
+        if (l <= tl) and (tr <= r) then begin // nếu [tl,tr] nằm trong [l,r]
+            t[v] := x;
+            marked[v] := true;
+            push(v,tl,tr); // tiếp tục đẩy xuống
+        end else begin
+            tmid := (tl + tr) div 2;
+            update(v * 2, tl, tmid, l, r, x); // 
+            update(v * 2 + 1, tmid + 1, tr, l, r, x); //
+        end;
+    end;
 
-int get(int v, int tl, int tr, int pos) {
-    if (tl == tr) {
-        return t[v];
-    }
-    push(v);
-    int tm = (tl + tr) / 2;
-    if (pos <= tm) 
-        return get(v*2, tl, tm, pos);
-    else
-        return get(v*2+1, tm+1, tr, pos);
-}
+function get(v, tl, tr, pos : longint): longint; // lấy giá trị của a[pos] ở thời điểm hiện tại
+    var tmid : longint;
+    begin
+        push(v,tl,tr); // đẩy phép gán xuống 2 nút con
+        if(tl == tr) then exit(t[v]);
+        tmid := (tl + tr) div 2;
+        if(pos <= tmid) then exit(get(v * 2,tl,tmid,pos)); // nếu pos nằm trong nút con bên trái thì gọi đệ quy sang nút bên trái
+        else exit(get(v * 2 + 1,tmid + 1,tr,pos)); // tương tự với bên phải
+    end;
 ```
 
 #### Cộng vào một đoạn, truy vấn giá trị max trong một đoạn
@@ -419,39 +426,46 @@ Vì vậy, đối với mỗi nút của Cây phân đoạn, chúng ta phải l
 Vì mục đích này, chúng ta lưu trữ một giá trị bổ sung cho mỗi nút. Trong giá trị này, chúng ta lưu trữ tổng các giá trị X lẽ ra phải được cộng vào đoạn nhưng do 'trì hoãn' nên chúng ta chưa truyền đến các nút con. Trước khi đi đến nút con, chúng ta gọi hàm push để đẩy giá trị X đến cả hai nút con. Chúng ta phải làm điều này trong cả hàm cập nhật và hàm truy vấn.
 
 ```
-void push(int v) {
-    t[v*2] += lazy[v];
-    lazy[v*2] += lazy[v];
-    t[v*2+1] += lazy[v];
-    lazy[v*2+1] += lazy[v];
-    lazy[v] = 0;
-}
+// lazy[v] = tổng giá trị X phải được cộng vào nút v nhưng đang bị 'trì hoãn'
+// t[v] = giá trị lớn nhất trong nút v
 
-void update(int v, int tl, int tr, int l, int r, int addend) {
-    if (l > r) 
-        return;
-    if (l == tl && tr == r) {
-        t[v] += addend;
-        lazy[v] += addend;
-    } else {
-        push(v);
-        int tm = (tl + tr) / 2;
-        update(v*2, tl, tm, l, min(r, tm), addend);
-        update(v*2+1, tm+1, tr, max(l, tm+1), r, addend);
-        t[v] = max(t[v*2], t[v*2+1]);
-    }
-}
+procedure push(v,tl,tr : longint);
+    begin
+        if(lazy[v] <> 0) then begin
+            t[v] := t[v] + lazy[v]; // cập nhật giá trị t[v]
+            if(tl < tr) then begin // đẩy tổng lazy[v] xuống
+                lazy[v * 2] := lazy[v * 2] + lazy[v];
+                lazy[v * 2 + 1] := lazy[v * 2 + 1] + lazy[v];
+            end;
+            lazy[v] := 0; // xoá lazy[v] vì lazy[v] đã được cập nhật vào t[v] rồi
+        end;
+    end;
 
-int query(int v, int tl, int tr, int l, int r) {
-    if (l > r)
-        return -INF;
-    if (l <= tl && tr <= r)
-        return t[v];
-    push(v);
-    int tm = (tl + tr) / 2;
-    return max(query(v*2, tl, tm, l, min(r, tm)), 
-               query(v*2+1, tm+1, tr, max(l, tm+1), r));
-}
+procedure update(v, tl, tr, l, r, x : longint); // cộng x vào đoạn [l,r]
+    var tmid : longint;
+    begin
+        push(v, tl, tr); // đẩy giá trị được cộng vào đoạn [tl,tr] xuống 2 nút con
+        if (l > tr) or (tl > r) then exit; // không giao nhau
+        if (l <= tl) and (tr <= r) then begin // nếu [tl,tr] nằm trong [l,r]
+            lazy[v] := lazy[v] + x;
+            push(v,tl,tr); // tiếp tục cập nhật t[v] và đẩy lazy[v] xuống
+        end else begin
+            tmid := (tl + tr) div 2;
+            update(v * 2, tl, tmid, l, r, x); // 
+            update(v * 2 + 1, tmid + 1, tr, l, r, x); //
+            t[v] := max(t[v * 2],t[v * 2 + 1]); // cập nhật lại giá trị lớn nhất trong nút v
+        end;
+    end;
+
+function query(v, tl, tr, l, r : longint): longint; // lấy giá trị lớn nhất trong đoạn [l...r]
+    var tmid : longint;
+    begin
+        push(v,tl,tr); // đẩy phép gán xuống 2 nút con
+        if (l > tr) or (tl > r) then exit(0); // không giao nhau
+        if (l <= tl) and (tr <= r) then exit(t[v]); // nếu [tl,tr] nằm trong [l,r]
+        tmid := (tl + tr) div 2;
+        exit(max(query(v * 2,tl, tmid,l,r),query(v * 2 + 1,tmid + 1,tr,l,r)));
+    end;
 ```
 
 ##  Bài tập
