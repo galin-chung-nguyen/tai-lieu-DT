@@ -120,13 +120,13 @@ procedure build(var a : intArr; v,tl,tr : longint);
 
 Ngoài ra, hàm trả lời các truy vấn tổng cũng là một hàm đệ quy, nhận tham số về nút hiện tại (tức là chỉ số v và ranh giới [tl...tr]) và cả thông tin về ranh giới [l...r] của truy vấn. Để đơn giản, hàm này luôn thực hiện hai cuộc gọi đệ quy, ngay cả khi chỉ cần một cuộc gọi - trong trường hợp đó, cuộc gọi đệ quy thừa sẽ có l \> r và trường hợp này có thể dễ dàng loại bỏ bằng cách sử dụng một điều kiện kiểm tra ở đầu hàm.
 ```
-function sum(v, tl, tr, l, r : longint):longint;
+function sum(v, tl, tr, l, r : longint):longint; // trả về tổng của phần giao của [tl,tr] và [l,r]
 	var tmid : longint;
 	begin
-		if(l > r) then exit(0);
-		if(l <= tl) and (tr <= r) then exit(t[v]);
+		if (l > r) or (l > tr) or (tl > r) then exit(0); // nếu 2 đoạn không giao nhau thì exit
+		if(l <= tl) and (tr <= r) then exit(t[v]); // nếu [tl,tr] nằm hoàn toàn trong [l,r] thì lấy cả nút này
 		tmid := (tl + tr) div 2;
-		exit(sum(v * 2, tl, tmid, l, r) + sum(v * 2 + 1, tmid + 1, tr, l, r));
+		exit(sum(v * 2, tl, tmid, l, r) + sum(v * 2 + 1, tmid + 1, tr, l, r)); // gọi truy vấn tới 2 nút con rồi tính tổng
 	end;
 ```
 
@@ -139,9 +139,9 @@ procedure update(v, tl, tr, pos, new_val : longint); // a[pos] = new_val
 		if(tl == tr) then t[v] := new_val;
 		else begin
 			tmid := (tl + tr) div 2;
-			if(pos <= tm) then update(v * 2, tl, tmid, pos, new_val)
+			if(pos <= tmid) then update(v * 2, tl, tmid, pos, new_val)
 			else update(v * 2 + 1,tmid + 1,tr,pos,new_val);
-			t[v] := t[v * 2] + t[v * 2 + 1];
+			t[v] := t[v * 2] + t[v * 2 + 1]; // cập nhật lại tổng của nút v
 		end;
 	end;
 ```
@@ -250,7 +250,7 @@ int find_kth(int v, int tl, int tr, int k) {
 }
 ```
 
-#### Tìm kiếm tiền tố mảng với một số tiền nhất định
+#### Tìm kiếm tiền tố của mảng
 
 Bài toán cụ thể như sau: cho một giá trị nhất định x, chúng ta phải tìm ra chỉ số `i` nhỏ nhất mà tổng của `i` phần tử đầu tiên của mảng a\[\] lớn hơn hoặc bằng x (giả sử rằng mảng a\[\] chỉ chứa các giá trị không âm).
 
