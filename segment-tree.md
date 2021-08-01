@@ -8,7 +8,7 @@ Một tính chất quan trọng là Segment Tree chỉ yêu cầu một lượng
 
 ## Dạng đơn giản nhất của Cây Phân đoạn
 
-Để bắt đầu, chúng ta hãy xem xét hình thức đơn giản nhất của Cây phân đoạn. Ở đây, chúng ta muốn trả lời các truy vấn tổng một cách hiệu quả. Yêu cầu cụ thể sẽ là : cho một mảng a\[0... n - 1\], ta cần xây dựng một Cây Phân đoạn có khả năng tìm tổng các phần tử trong một đoạn [l,r] (tức là tính tổng `∑i\=lra\[i\]`), cũng như có thể thay đổi giá trị của các phần tử trong mảng (tức là thực hiện phép gán a\[i\]\=x). Cây Phân đoạn sẽ có thể xử lý cả hai truy vấn trong thời gian `O(log⁡n)` .
+Để bắt đầu, chúng ta hãy xem xét hình thức đơn giản nhất của Cây phân đoạn. Ở đây, chúng ta muốn trả lời các truy vấn tổng một cách hiệu quả. Yêu cầu cụ thể sẽ là : cho một mảng a\[0... n - 1\], ta cần xây dựng một Cây Phân đoạn có khả năng tìm tổng các phần tử trong một đoạn [l,r] (tức là tính tổng `∑a[i] (i=l->r)`), cũng như có thể thay đổi giá trị của các phần tử trong mảng (tức là thực hiện phép gán a\[i\]\=x). Cây Phân đoạn sẽ có thể xử lý cả hai truy vấn trong thời gian `O(log⁡n)` .
 
 ### Cấu trúc của Cây Phân đoạn
 
@@ -33,7 +33,7 @@ Từ mô tả này, chúng ta đã có thể kết luận rằng *`Cây Phân đ
 Trước khi xây dựng cây phân đoạn, chúng ta cần quyết định : 
 
 1.  `giá trị` được lưu trữ tại mỗi nút của cây phân đoạn. Ví dụ: trong một cây phân đoạn tính tổng tổng, một nút sẽ lưu trữ tổng các phần tử trong phạm vi \[l,r\] của nó.
-2.  thao tác `hợp nhất (merge)` hai nút 'anh em' trong một cây phân đoạn. Ví dụ: trong một cây phân đoạn tổng, hai nút tương ứng với phạm vi a\[l1... r1\] và a\[l2... r2\] sẽ được hợp nhất thành một nút tương ứng với phạm vi a\[l1... r2\] bằng cách cộng các giá trị của hai nút.
+2.  thao tác `hợp nhất (merge)` hai nút 'anh em' trong một cây phân đoạn. Ví dụ: trong một cây phân đoạn tổng, hai nút tương ứng với phạm vi a\[l1... r1\] và a\[l2... r2\] sẽ được hợp nhất thành một nút tương ứng với phạm vi a\[l1... r2\] bằng cách cộng các giá trị của hai nút.
 
 Lưu ý rằng một nút là "nút lá", nếu phân đoạn tương ứng của nó chỉ bao gồm một phần tử trong mảng ban đầu. Nó có mặt ở cấp dưới cùng của một cây phân đoạn. Giá trị của nó sẽ bằng phần tử (tương ứng) a\[i\].
 
